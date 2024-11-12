@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: myapp-api
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=myapp
+      - GIN_MODE=debug
+    depends_on:
+      - db
+    networks:
+      - myapp-network
+    restart: unless-stopped
+    # Enable hot reload for development
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:14-alpine
+    container_name: myapp-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=myapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - myapp-network
+    restart: unless-stopped
+    # Healthcheck to verify database is ready
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optional: Add pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: myapp-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - myapp-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: myapp-postgres-data
+
+networks:
+  myapp-network:
+    name: myapp-network
+    driver: bridge
