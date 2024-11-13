@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: myapp-api
+    container_name: time-manager-api
     ports:
       - "8080:8080"
     environment:
@@ -13,42 +13,39 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_NAME=myapp
+      - DB_NAME=time-manager
       - GIN_MODE=debug
     depends_on:
       - db
     networks:
-      - myapp-network
+      - time-manager-network
     restart: unless-stopped
-    # Enable hot reload for development
     volumes:
       - .:/app
 
   db:
     image: postgres:14-alpine
-    container_name: myapp-db
+    container_name: time-manager-db
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=myapp
+      - POSTGRES_DB=time-manager
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - myapp-network
+      - time-manager-network
     restart: unless-stopped
-    # Healthcheck to verify database is ready
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Optional: Add pgAdmin for database management
   pgadmin:
     image: dpage/pgadmin4
-    container_name: myapp-pgadmin
+    container_name: time-manager-pgadmin
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com
       - PGADMIN_DEFAULT_PASSWORD=admin
@@ -57,14 +54,14 @@ services:
     depends_on:
       - db
     networks:
-      - myapp-network
+      - time-manager-network
     restart: unless-stopped
 
 volumes:
   postgres_data:
-    name: myapp-postgres-data
+    name: time-manager-postgres-data
 
 networks:
-  myapp-network:
-    name: myapp-network
+  time-manager-network:
+    name: time-manager-network
     driver: bridge

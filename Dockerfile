@@ -1,25 +1,37 @@
-FROM golang:1.21-alpine
+# Use Go 1.22 as 1.23 is not yet available
+FROM docker.io/library/golang:1.23.2-alpine
 
-# Install build dependencies
-RUN apk add --no-cache gcc musl-dev
+# Add build dependencies and debugging tools
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    git \
+    bash \
+    curl
 
 # Set working directory
 WORKDIR /app
 
-# Copy go mod files
+# Copy go mod and sum files
 COPY go.mod go.sum ./
 
-# Download dependencies
+# Print Go version for debugging
+RUN go version
+
+# Modify go.mod to use Go 1.23.2
+RUN go mod edit -go=1.23.2
+
+# Download all dependencies
 RUN go mod download
 
-# Copy source code
+# Copy the source code
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=1 GOOS=linux go build -o main ./cmd/api
+RUN CGO_ENABLED=1 go build -o main ./cmd/api
 
-# Expose port
+# Expose port 8080
 EXPOSE 8080
 
-# Run the application
+# Command to run the application
 CMD ["./main"]
