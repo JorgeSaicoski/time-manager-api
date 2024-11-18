@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -46,6 +47,10 @@ func (h *TotalTimeHandler) CreateTotalTime(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, totalTime)
+}
+
+func (h *TotalTimeHandler) CloseTotalTime(c *gin.Context) {
+	fmt.Println(c)
 }
 
 /*

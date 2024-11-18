@@ -11,8 +11,10 @@ func SetupRouter(cfg *database.Config) *gin.Engine {
 	router := gin.Default()
 
 	userHandler := handlers.NewUserHandler(cfg.DB)
+	totalTimeHandler := handlers.NewTotalTimerHandler(cfg.DB)
 
 	SetupUserRoutes(router, userHandler)
+	SetupTotalTimeRoutes(router, totalTimeHandler)
 
 	return router
 }
