@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/JorgeSaicoski/time-manager-api/internal/handlers"
@@ -10,7 +12,11 @@ import (
 func SetupUserRoutes(router *gin.Engine, userHandler *handlers.UserHandler) {
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok"})
+		fmt.Println("test")
+		c.JSON(200, gin.H{
+				"status": "ok",
+				"message": "Health check passed",
+		})
 	})
 
 	// Public routes

@@ -8,12 +8,21 @@ import (
 )
 
 func SetupTotalTimeRoutes(router *gin.Engine, totalTimeHandler *handlers.TotalTimeHandler) {
+	router.GET("/totaltime", func(c *gin.Context) {
+			c.JSON(200, gin.H{
+					"status": "ok",
+					"message": "Health check passed",
+			})
+	})
   protected := router.Group("/totaltime")
 	protected.Use(middleware.AuthMiddleware())
 	{
 		//health
 		protected.GET("/health", func(c *gin.Context) {
-			c.JSON(200, gin.H{"status": "ok"})
+				c.JSON(200, gin.H{
+						"status": "ok",
+						"message": "Health check passed",
+				})
 		})
 		// Totaltime routes
     protected.POST("/create", totalTimeHandler.CreateTotalTime)
