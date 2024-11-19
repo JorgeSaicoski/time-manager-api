@@ -25,4 +25,9 @@ func SetupTotalTimeRoutes(router *gin.Engine, totalTimeHandler *handlers.TotalTi
 	protected.POST("/user/:user_id", totalTimeHandler.CreateTotalTime)
 	protected.PUT("/user/:user_id", totalTimeHandler.CloseTotalTime)
 	protected.GET("/user/:user_id", totalTimeHandler.GetTotalTime)
+	//get :totaltime_id/user/:user_id/
+	//get /user/:user_id/query (will take by month/week/day)
+	//get :totaltime_id/user/:user_id/
+	//put :totaltime_id/user/:user_id/
+
 }
