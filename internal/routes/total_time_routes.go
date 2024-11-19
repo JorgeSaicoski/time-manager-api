@@ -1,32 +1,28 @@
 package routes
 
 import (
-    "github.com/gin-gonic/gin"
-    "github.com/JorgeSaicoski/time-manager-api/internal/handlers"
-    "github.com/JorgeSaicoski/time-manager-api/internal/middleware"
+	"github.com/JorgeSaicoski/time-manager-api/internal/handlers"
+	"github.com/JorgeSaicoski/time-manager-api/internal/middleware"
+	"github.com/gin-gonic/gin"
 )
 
 func SetupTotalTimeRoutes(router *gin.Engine, totalTimeHandler *handlers.TotalTimeHandler) {
-    protected := router.Group("/totaltime")
-    protected.Use(middleware.AuthMiddleware())
-    protected.Use(middleware.VerifyUserMiddleware())
+	// Base group with auth middleware
+	protected := router.Group("/totaltime")
+	protected.Use(middleware.AuthMiddleware())
+	protected.Use(middleware.VerifyUserMiddleware())
 
-    protected.GET("/health", func(c *gin.Context) {
-        userID := c.GetString("user_id")
-        if userID == "" {
-            c.JSON(401, gin.H{
-                "status":  "error",
-                "message": "Unauthorized access",
-            })
-            return
-        }
-        c.JSON(200, gin.H{
-            "status":  "ok",
-            "message": "Health check passed",
-        })
-    })
+	// User-specific routes with user_id parameter
+	protected.GET("/user/:user_id/health", func(c *gin.Context) {
+		userID := c.Param("user_id")
+		c.JSON(200, gin.H{
+			"status":  "ok",
+			"message": "Health check passed",
+			"user_id": userID,
+		})
+	})
 
-    protected.POST("/", totalTimeHandler.CreateTotalTime)
-    protected.PUT("/", totalTimeHandler.CloseTotalTime)
-    protected.GET("/", totalTimeHandler.GetTotalTime)
+	protected.POST("/user/:user_id", totalTimeHandler.CreateTotalTime)
+	protected.PUT("/user/:user_id", totalTimeHandler.CloseTotalTime)
+	protected.GET("/user/:user_id", totalTimeHandler.GetTotalTime)
 }

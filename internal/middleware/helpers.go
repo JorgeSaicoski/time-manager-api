@@ -6,7 +6,7 @@ import (
 )
 
 func GetUserRequesting(c *gin.Context) (int64, error) {
-	userIDInterface, exists := c.Get("user_id")
+	userIDInterface, exists := c.Param("user_id")
 	if !exists {
 		return 0, fmt.Errorf("user ID not found in context")
 	}
