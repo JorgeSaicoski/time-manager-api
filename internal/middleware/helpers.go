@@ -1,24 +1,20 @@
 package middleware
 
 import (
-	"github.com/JorgeSaicoski/time-manager-api/internal/models"
-	"gorm.io/gorm"
-
-	"strings"
-	"time"
+	"fmt"
+	"github.com/gin-gonic/gin"
 )
 
-var DB *gorm.DB
-
-func StopCurrentlyTotalTime(userID int64) error {
-	var totalTime models.TotalTime
-	result := DB.Where("user_id = ? AND closed = ?", userID, false).First(&totalTime)
-	if result.Error != nil {
-		return fmt.Errorf("error finding total time: %w", result.Error)
+func GetUserRequesting(c *gin.Context) (int64, error) {
+	userIDInterface, exists := c.Get("user_id")
+	if !exists {
+		return 0, fmt.Errorf("user ID not found in context")
 	}
 
-	totalTime.Closed = true
-	totalTime.FinishTime = time.Now()
+	userID, ok := userIDInterface.(int64)
+	if !ok {
+		return 0, fmt.Errorf("invalid user ID type")
+	}
 
-	return DB.Save(&totalTime).Error
+	return userID, nil
 }

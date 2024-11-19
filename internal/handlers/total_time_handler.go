@@ -2,13 +2,12 @@ package handlers
 
 import (
 	"fmt"
-	"net/http"
-	"time"
-
+	"github.com/JorgeSaicoski/time-manager-api/internal/middleware"
+	"github.com/JorgeSaicoski/time-manager-api/internal/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-
-	"github.com/JorgeSaicoski/time-manager-api/internal/models"
+	"net/http"
+	"time"
 )
 
 type TotalTimeHandler struct {
@@ -30,15 +29,14 @@ func (h *TotalTimeHandler) CreateTotalTime(c *gin.Context) {
 		return
 	}
 
-	userIDInterface, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "User ID not found in context"})
+	userID, err := middleware.GetUserRequesting(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	userID, ok := userIDInterface.(int64)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+	if err := middleware.StopCurrentTotalTime(userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to stop current total time"})
 		return
 	}
 
@@ -46,8 +44,6 @@ func (h *TotalTimeHandler) CreateTotalTime(c *gin.Context) {
 	if req.CompanyID != 0 {
 		companyID = &req.CompanyID
 	}
-
-	fmt.Printf("Authenticated User ID: %d\n", userID)
 
 	totalTime := models.TotalTime{
 		UserID:    userID,
@@ -65,6 +61,38 @@ func (h *TotalTimeHandler) CreateTotalTime(c *gin.Context) {
 }
 
 func (h *TotalTimeHandler) CloseTotalTime(c *gin.Context) {
-	// waiting
-	fmt.Println(c)
+	userID, err := middleware.GetUserRequesting(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := middleware.StopCurrentTotalTime(userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to stop current total time"})
+		return
+	}
+
+	totalTime, err := middleware.GetCurrentTotalTime(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get current total time"})
+		return
+	}
+
+	c.JSON(http.StatusOK, totalTime)
+}
+
+func (h *TotalTimeHandler) GetTotalTime(c *gin.Context) {
+	userID, err := middleware.GetUserRequesting(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	totalTime, err := middleware.GetCurrentTotalTime(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get current total time"})
+		return
+	}
+
+	c.JSON(http.StatusOK, totalTime)
 }
