@@ -3,18 +3,13 @@ package middleware
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 func GetUserRequesting(c *gin.Context) (int64, error) {
-	userIDInterface, exists := c.Param("user_id")
-	if !exists {
-		return 0, fmt.Errorf("user ID not found in context")
+	userID, err := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("user ID not found in context or invalid format")
 	}
-
-	userID, ok := userIDInterface.(int64)
-	if !ok {
-		return 0, fmt.Errorf("invalid user ID type")
-	}
-
 	return userID, nil
 }
