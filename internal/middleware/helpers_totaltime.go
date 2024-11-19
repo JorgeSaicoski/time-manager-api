@@ -9,13 +9,16 @@ import (
 
 var DB *gorm.DB
 
-func GetCurrentTotalTime(userID int64) (models.TotalTime, error) {
+func GetCurrentTotalTime(userID int64) (*models.TotalTime, error) {
 	var totalTime models.TotalTime
 	result := DB.Where("user_id = ? AND closed = ?", userID, false).First(&totalTime)
 	if result.Error != nil {
-		return totalTime, fmt.Errorf("error finding total time: %w", result.Error)
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, result.Error
 	}
-	return totalTime, nil
+	return &totalTime, nil
 }
 
 func StopCurrentTotalTime(userID int64) error {

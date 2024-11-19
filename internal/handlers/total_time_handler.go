@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/JorgeSaicoski/time-manager-api/internal/middleware"
 	"github.com/JorgeSaicoski/time-manager-api/internal/models"
 	"github.com/gin-gonic/gin"
@@ -82,17 +81,22 @@ func (h *TotalTimeHandler) CloseTotalTime(c *gin.Context) {
 }
 
 func (h *TotalTimeHandler) GetTotalTime(c *gin.Context) {
-	userID, err := middleware.GetUserRequesting(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+    userID, err := middleware.GetUserRequesting(c)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
 
-	totalTime, err := middleware.GetCurrentTotalTime(userID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get current total time"})
-		return
-	}
+    totalTime, err := middleware.GetCurrentTotalTime(userID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get current total time"})
+        return
+    }
 
-	c.JSON(http.StatusOK, totalTime)
+    if totalTime == nil {
+        c.JSON(http.StatusOK, gin.H{"message": "No current total time found"})
+        return
+    }
+
+    c.JSON(http.StatusOK, totalTime)
 }
