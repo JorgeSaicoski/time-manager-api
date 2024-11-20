@@ -37,7 +37,7 @@ func main() {
 		&models.Brb{},
 		&models.ProjectMember{},
 		&models.ResolutionTracker{},
-		&models.ResolutionUnit{}
+		&models.ResolutionUnit{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
