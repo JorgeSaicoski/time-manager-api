@@ -10,11 +10,11 @@ import (
 )
 
 type TotalTimeHandler struct {
-	db *gorm.DB
+	repo *repository.Repository
 }
 
-func NewTotalTimerHandler(db *gorm.DB) *TotalTimeHandler {
-	return &TotalTimeHandler{db: db}
+func NewTotalTimerHandler(repo *repository.Repository) *TotalTimeHandler {
+	return &TotalTimeHandler{repo: repo}
 }
 
 type CreateRequest struct {
@@ -34,7 +34,7 @@ func (h *TotalTimeHandler) CreateTotalTime(c *gin.Context) {
 		return
 	}
 
-	if err := middleware.StopCurrentTotalTime(userID); err != nil {
+	if err := h.repo.StopCurrentTotalTime(userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to stop current total time"})
 		return
 	}
@@ -51,7 +51,7 @@ func (h *TotalTimeHandler) CreateTotalTime(c *gin.Context) {
 		Closed:    false,
 	}
 
-	if result := h.db.Create(&totalTime); result.Error != nil {
+	if result := h.repo.CreateTotalTime(&totalTime); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create total time"})
 		return
 	}
@@ -66,12 +66,12 @@ func (h *TotalTimeHandler) CloseTotalTime(c *gin.Context) {
 		return
 	}
 
-	if err := middleware.StopCurrentTotalTime(userID); err != nil {
+	if err := h.repo.StopCurrentTotalTime(userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to stop current total time"})
 		return
 	}
 
-	totalTime, err := middleware.GetCurrentTotalTime(userID)
+	totalTime, err := h.repo.GetCurrentTotalTime(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get current total time"})
 		return
@@ -81,22 +81,22 @@ func (h *TotalTimeHandler) CloseTotalTime(c *gin.Context) {
 }
 
 func (h *TotalTimeHandler) GetTotalTime(c *gin.Context) {
-    userID, err := middleware.GetUserRequesting(c)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
+	userID, err := middleware.GetUserRequesting(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-    totalTime, err := middleware.GetCurrentTotalTime(userID)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get current total time"})
-        return
-    }
+	totalTime, err := h.repo.GetCurrentTotalTime(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get current total time"})
+		return
+	}
 
-    if totalTime == nil {
-        c.JSON(http.StatusOK, gin.H{"message": "No current total time found"})
-        return
-    }
+	if totalTime == nil {
+		c.JSON(http.StatusOK, gin.H{"message": "No current total time found"})
+		return
+	}
 
-    c.JSON(http.StatusOK, totalTime)
+	c.JSON(http.StatusOK, totalTime)
 }
