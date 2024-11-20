@@ -24,7 +24,21 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	err = db.AutoMigrate(&models.User{})
+	err = db.AutoMigrate(
+		&models.User{},
+		&models.TotalTime{},
+		&models.WorkTime{},
+		&models.Project{},
+		&models.Company{},
+		&models.UserCompanyRole{},
+		&models.Task{},
+		&models.Cost{},
+		&models.BreakTime{},
+		&models.Brb{},
+		&models.ProjectMember{},
+		&models.ResolutionTracker{},
+		&models.ResolutionUnit{}
+	)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
