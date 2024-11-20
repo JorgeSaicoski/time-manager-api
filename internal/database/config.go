@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/JorgeSaicoski/time-manager-api/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -69,6 +70,24 @@ func InitDB() (*gorm.DB, error) {
 	// Configure connection pool
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
+
+	if err := db.AutoMigrate(
+		&models.User{},
+		&models.TotalTime{},
+		&models.WorkTime{},
+		&models.Project{},
+		&models.Company{},
+		&models.UserCompanyRole{},
+		&models.Task{},
+		&models.Cost{},
+		&models.BreakTime{},
+		&models.Brb{},
+		&models.ProjectMember{},
+		&models.ResolutionTracker{},
+		&models.ResolutionUnit{},
+	); err != nil {
+		return nil, fmt.Errorf("failed to migrate database: %w", err)
+	}
 
 	return db, nil
 }

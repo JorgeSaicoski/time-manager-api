@@ -8,9 +8,9 @@ import (
 
 type TotalTime struct {
 	gorm.Model
-	ID         int64  `gorm:"primaryKey"`
-	UserID     int64  `gorm:"not null"`
-	CompanyID  *int64 // Optional company association
+	ID         int64 `gorm:"primaryKey"`
+	UserID     int64 `gorm:"not null"`
+	CompanyID  *int64
 	StartTime  time.Time
 	FinishTime time.Time
 	WorkTimes  []WorkTime `gorm:"foreignKey:TotalTimeID"`
@@ -23,8 +23,8 @@ type WorkTime struct {
 	gorm.Model
 	ID          int64 `gorm:"primaryKey"`
 	TotalTimeID int64
-	UserID      int64  `gorm:"not null"`
-	CompanyID   *int64 // Optional company association
+	UserID      int64 `gorm:"not null"`
+	CompanyID   *int64
 	StartTime   time.Time
 	Duration    time.Duration
 	Projects    []Project `gorm:"many2many:work_time_projects;"`
@@ -58,7 +58,7 @@ type UserCompanyRole struct {
 	ID        int64   `gorm:"primaryKey"`
 	CompanyID int64   `gorm:"not null"`
 	UserID    int64   `gorm:"not null"`
-	Role      string  `gorm:"type:enum('admin','manager','employee');not null"`
+	Role      string  `gorm:"not null"`
 	User      User    `gorm:"foreignKey:UserID"`
 	Company   Company `gorm:"foreignKey:CompanyID"`
 }
@@ -68,8 +68,8 @@ type Project struct {
 	ID          int64  `gorm:"primaryKey"`
 	Name        string `gorm:"not null"`
 	Description string
-	CompanyID   *int64 // Optional: null means it's a personal/freelance project
-	OwnerID     int64  `gorm:"not null"` // User who created the project
+	CompanyID   *int64
+	OwnerID     int64 `gorm:"not null"`
 	StartTime   time.Time
 	Duration    time.Duration
 	Closed      bool
@@ -82,11 +82,11 @@ type Project struct {
 }
 
 type WorkTimeProject struct {
-	ID         int64     `gorm:"primaryKey"`
-	WorkTimeID int64     `gorm:"primaryKey"`
-	ProjectID  int64     `gorm:"primaryKey"`
-	UserID     int64     `gorm:"not null"`
-	CompanyID  *int64    // Optional company association
+	ID         int64 `gorm:"primaryKey"`
+	WorkTimeID int64 `gorm:"primaryKey"`
+	ProjectID  int64 `gorm:"primaryKey"`
+	UserID     int64 `gorm:"not null"`
+	CompanyID  *int64
 	StartTime  time.Time `gorm:"not null"`
 	Duration   time.Duration
 	Closed     bool
@@ -96,13 +96,13 @@ type WorkTimeProject struct {
 
 type Task struct {
 	gorm.Model
-	ID          int64  `gorm:"primaryKey"`
-	ProjectID   int64  `gorm:"not null"`
-	AssigneeID  int64  // User assigned to the task
+	ID          int64 `gorm:"primaryKey"`
+	ProjectID   int64 `gorm:"not null"`
+	AssigneeID  int64
 	Title       string `gorm:"not null"`
 	Description string
 	Deadline    time.Time
-	Status      string `gorm:"type:enum('todo','in_progress','done');default:'todo'"`
+	Status      string `gorm:"not null"`
 	Closed      bool
 }
 
@@ -116,10 +116,10 @@ type Cost struct {
 
 type BreakTime struct {
 	gorm.Model
-	ID          int64  `gorm:"primaryKey"`
-	TotalTimeID int64  `gorm:"not null"`
-	UserID      int64  `gorm:"not null"`
-	CompanyID   *int64 // Optional company association
+	ID          int64 `gorm:"primaryKey"`
+	TotalTimeID int64 `gorm:"not null"`
+	UserID      int64 `gorm:"not null"`
+	CompanyID   *int64
 	StartTime   time.Time
 	Duration    time.Duration
 	Active      bool `gorm:"default:true"`
@@ -127,10 +127,10 @@ type BreakTime struct {
 
 type Brb struct {
 	gorm.Model
-	ID          int64  `gorm:"primaryKey"`
-	TotalTimeID int64  `gorm:"not null"`
-	UserID      int64  `gorm:"not null"`
-	CompanyID   *int64 // Optional company association
+	ID          int64 `gorm:"primaryKey"`
+	TotalTimeID int64 `gorm:"not null"`
+	UserID      int64 `gorm:"not null"`
+	CompanyID   *int64
 	StartTime   time.Time
 	Duration    time.Duration
 	Active      bool `gorm:"default:true"`
@@ -141,8 +141,8 @@ type ProjectMember struct {
 	ID         int64  `gorm:"primaryKey"`
 	ProjectID  int64  `gorm:"not null"`
 	UserID     int64  `gorm:"not null"`
-	Role       string `gorm:"type:enum('owner','manager','member');not null;default:'member'"`
-	IsExternal bool   `gorm:"default:false"` // For freelancers/external collaborators
+	Role       string `gorm:"not null"`
+	IsExternal bool   `gorm:"default:false"`
 }
 
 type ResolutionTracker struct {
@@ -160,7 +160,7 @@ type ResolutionUnit struct {
 	ID         int64             `gorm:"primaryKey"`
 	TrackerID  int64             `gorm:"not null"`
 	UserID     int64             `gorm:"not null"`
-	CompanyID  *int64            // Optional company association
+	CompanyID  *int64
 	Tracker    ResolutionTracker `gorm:"foreignKey:TrackerID"`
 	Identifier string            `gorm:"size:255"`
 	Resolved   bool

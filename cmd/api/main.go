@@ -8,7 +8,6 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/JorgeSaicoski/time-manager-api/internal/database"
-	"github.com/JorgeSaicoski/time-manager-api/internal/models"
 	"github.com/JorgeSaicoski/time-manager-api/internal/routes"
 )
 
@@ -23,22 +22,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-
-	err = db.AutoMigrate(
-		&models.User{},
-		&models.TotalTime{},
-		&models.WorkTime{},
-		&models.Project{},
-		&models.Company{},
-		&models.UserCompanyRole{},
-		&models.Task{},
-		&models.Cost{},
-		&models.BreakTime{},
-		&models.Brb{},
-		&models.ProjectMember{},
-		&models.ResolutionTracker{},
-		&models.ResolutionUnit{},
-	)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
