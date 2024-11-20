@@ -25,9 +25,13 @@ func (r *Repository) StopCurrentTotalTime(userID int64) error {
 		return fmt.Errorf("error finding total time: %w", err)
 	}
 
+	if totalTime == nil {
+		return nil
+	}
+
 	totalTime.Closed = true
 	totalTime.FinishTime = time.Now()
-	return h.db.Save(&totalTime).Error
+	return r.db.Save(totalTime).Error
 }
 
 func (r *Repository) CreateTotalTime(tt *models.TotalTime) error {

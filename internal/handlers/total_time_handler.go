@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	"github.com/JorgeSaicoski/time-manager-api/internal/middleware"
-	"github.com/JorgeSaicoski/time-manager-api/internal/models"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"time"
+
+	"github.com/JorgeSaicoski/time-manager-api/internal/middleware"
+	"github.com/JorgeSaicoski/time-manager-api/internal/models"
+	"github.com/JorgeSaicoski/time-manager-api/internal/repository"
+	"github.com/gin-gonic/gin"
 )
 
 type TotalTimeHandler struct {
