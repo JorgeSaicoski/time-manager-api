@@ -11,6 +11,10 @@ import (
 )
 
 func SetupRouter(cfg *database.Config) *gin.Engine {
+	if cfg == nil || cfg.DB == nil {
+		panic("database configuration cannot be nil")
+	}
+
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"http://localhost:3000"},

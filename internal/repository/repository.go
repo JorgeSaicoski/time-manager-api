@@ -7,5 +7,8 @@ type Repository struct {
 }
 
 func New(db *gorm.DB) *Repository {
+	if db == nil {
+		panic("database connection cannot be nil")
+	}
 	return &Repository{db: db}
 }

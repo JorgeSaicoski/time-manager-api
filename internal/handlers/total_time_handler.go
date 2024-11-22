@@ -15,6 +15,9 @@ type TotalTimeHandler struct {
 }
 
 func NewTotalTimerHandler(repo *repository.Repository) *TotalTimeHandler {
+	if repo == nil {
+		panic("repository cannot be nil")
+	}
 	return &TotalTimeHandler{repo: repo}
 }
 
@@ -52,10 +55,11 @@ func (h *TotalTimeHandler) CreateTotalTime(c *gin.Context) {
 		Closed:    false,
 	}
 
-	if result := h.repo.CreateTotalTime(&totalTime); result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create total time"})
-		return
+	if err := h.repo.CreateTotalTime(&totalTime); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create total time"})
+			return
 	}
+
 
 	c.JSON(http.StatusOK, totalTime)
 }
