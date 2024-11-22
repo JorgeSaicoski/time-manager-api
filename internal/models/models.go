@@ -157,9 +157,9 @@ type ResolutionTracker struct {
 
 type ResolutionUnit struct {
 	gorm.Model
-	ID         int64             `gorm:"primaryKey"`
-	TrackerID  int64             `gorm:"not null"`
-	UserID     int64             `gorm:"not null"`
+	ID         int64 `gorm:"primaryKey"`
+	TrackerID  int64 `gorm:"not null"`
+	UserID     int64 `gorm:"not null"`
 	CompanyID  *int64
 	Tracker    ResolutionTracker `gorm:"foreignKey:TrackerID"`
 	Identifier string            `gorm:"size:255"`
