@@ -81,7 +81,7 @@ func (h *TotalTimeHandler) CloseTotalTime(c *gin.Context) {
 	c.JSON(http.StatusOK, totalTime)
 }
 
-func (h *TotalTimeHandler) GetTotalTime(c *gin.Context) {
+func (h *TotalTimeHandler) GetCurrentTotalTime(c *gin.Context) {
 	userID, err := middleware.GetUserRequesting(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
