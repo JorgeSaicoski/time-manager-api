@@ -150,7 +150,6 @@ func AdminMiddleware() gin.HandlerFunc {
 
 func VerifyUserMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Extract user_id from JWT (set by AuthMiddleware)
 		jwtUserIDInterface, exists := c.Get("user_id")
 		if !exists {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "User ID not found in context"})
@@ -165,7 +164,6 @@ func VerifyUserMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Extract user_id from URL parameter
 		paramUserIDStr := c.Param("user_id")
 		if paramUserIDStr == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
@@ -173,7 +171,6 @@ func VerifyUserMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Convert user_id from string to int64
 		paramUserID, err := strconv.ParseInt(paramUserIDStr, 10, 64)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User ID"})
@@ -181,7 +178,6 @@ func VerifyUserMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Compare the two user IDs
 		if paramUserID != jwtUserID {
 			c.JSON(http.StatusForbidden, gin.H{"error": "You are not authorized to access this resource"})
 			c.Abort()

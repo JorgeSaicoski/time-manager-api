@@ -15,17 +15,14 @@ import (
 	"github.com/JorgeSaicoski/time-manager-api/internal/models"
 )
 
-// UserHandler handles user-related requests
 type UserHandler struct {
 	db *gorm.DB
 }
 
-// NewUserHandler creates a new user handler
 func NewUserHandler(db *gorm.DB) *UserHandler {
 	return &UserHandler{db: db}
 }
 
-// Request/Response structures
 type RegisterRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=8"`
@@ -63,7 +60,6 @@ type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token" binding:"required"`
 }
 
-// GetCurrentUser gets the current user's profile
 func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	var user models.User
@@ -82,7 +78,6 @@ func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 	})
 }
 
-// UpdateCurrentUser updates the current user's profile
 func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 
@@ -92,7 +87,6 @@ func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
 		return
 	}
 
-	// Check if email is already taken
 	if req.Email != "" {
 		var existingUser models.User
 		if err := h.db.Where("email = ? AND id != ?", req.Email, userID).First(&existingUser).Error; err == nil {
@@ -120,7 +114,6 @@ func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
 		return
 	}
 
-	// Return updated user
 	c.JSON(http.StatusOK, UserResponse{
 		ID:            user.ID,
 		Email:         user.Email,
@@ -130,7 +123,6 @@ func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
 	})
 }
 
-// ChangePassword changes the current user's password
 func (h *UserHandler) ChangePassword(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 
@@ -146,13 +138,11 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	// Verify current password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.CurrentPassword)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Current password is incorrect"})
 		return
 	}
 
-	// Hash new password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
@@ -192,7 +182,6 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
 }
 
-// UpdateUserRole updates a user's role (admin only)
 func (h *UserHandler) UpdateUserRole(c *gin.Context) {
 	userID := c.Param("id")
 
@@ -217,21 +206,18 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Check if user already exists
 	var existingUser models.User
 	if result := h.db.Where("email = ?", req.Email).First(&existingUser); !errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusConflict, gin.H{"error": "Email already registered"})
 		return
 	}
 
-	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
-	// Create new user
 	user := models.User{
 		Email:    req.Email,
 		Password: string(hashedPassword),
@@ -243,7 +229,6 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Generate tokens
 	tokens, err := middleware.GenerateTokenPair(user.ID, user.Email, user.IsSystemAdmin)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate tokens"})
@@ -262,7 +247,6 @@ func (h *UserHandler) Register(c *gin.Context) {
 	})
 }
 
-// Login handles user login
 func (h *UserHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -280,13 +264,11 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Compare passwords
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
-	// Generate tokens
 	tokens, err := middleware.GenerateTokenPair(user.ID, user.Email, user.IsSystemAdmin)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate tokens"})
@@ -305,7 +287,6 @@ func (h *UserHandler) Login(c *gin.Context) {
 	})
 }
 
-// RefreshToken handles token refresh
 func (h *UserHandler) RefreshToken(c *gin.Context) {
 	var req RefreshTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -313,7 +294,6 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	// Parse and validate refresh token
 	claims := &middleware.JWTClaims{}
 	token, err := jwt.ParseWithClaims(req.RefreshToken, claims, func(token *jwt.Token) (interface{}, error) {
 		return middleware.JwtSecret, nil
@@ -324,7 +304,6 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	// Generate new token pair
 	tokens, err := middleware.GenerateTokenPair(claims.UserID, claims.Email, claims.IsSystemAdmin)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate tokens"})
@@ -334,15 +313,12 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 	c.JSON(http.StatusOK, tokens)
 }
 
-// DeleteUser handles user account deletion
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	userID := c.Param("id")
 
-	// Check if the requesting user has permission
 	requestingUserID, _ := c.Get("user_id")
 	isAdmin, _ := c.Get("is_system_admin")
 
-	// Only allow users to delete their own account or admins to delete any account
 	if requestingUserID != userID && !isAdmin.(bool) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
 		return
@@ -350,7 +326,6 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 
 	tx := h.db.Begin()
 
-	// Delete user's associated records
 	if err := tx.Where("user_id = ?", userID).Delete(&models.TotalTime{}).Error; err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
@@ -386,7 +361,6 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 func (h *UserHandler) ListUsers(c *gin.Context) {
 	var users []models.User
 
-	// Add pagination
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	offset := (page - 1) * limit
@@ -399,7 +373,6 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 		return
 	}
 
-	// Convert to response type
 	var userResponses []UserResponse
 	for _, user := range users {
 		userResponses = append(userResponses, UserResponse{
@@ -443,7 +416,6 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	})
 }
 
-// DeleteCurrentUser is referenced but missing
 func (h *UserHandler) DeleteCurrentUser(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 
@@ -455,11 +427,9 @@ func (h *UserHandler) DeleteCurrentUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Account deleted successfully"})
 }
 
-// Helper function for user deletion
 func (h *UserHandler) deleteUser(_ *gin.Context, userID int64) error {
 	tx := h.db.Begin()
 
-	// Delete associated records
 	if err := tx.Where("user_id = ?", userID).Delete(&models.TotalTime{}).Error; err != nil {
 		tx.Rollback()
 		return err

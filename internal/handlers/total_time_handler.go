@@ -56,10 +56,9 @@ func (h *TotalTimeHandler) CreateTotalTime(c *gin.Context) {
 	}
 
 	if err := h.repo.CreateTotalTime(&totalTime); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create total time"})
-			return
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create total time"})
+		return
 	}
-
 
 	c.JSON(http.StatusOK, totalTime)
 }

@@ -38,7 +38,7 @@ func InitDB() (*gorm.DB, error) {
 
 	dbName := os.Getenv("DB_NAME")
 	if dbName == "" {
-		dbName = "myapp"
+		dbName = "time_manager"
 	}
 
 	// Construct database connection string
