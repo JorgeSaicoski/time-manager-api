@@ -13,5 +13,5 @@ func (r *Repository) GetRunningBreak(userID int64) (*models.BreakTime, error){
     return nil, nil
   }
 
-  return break, nil  
+	return &break, nil  
 }

@@ -9,12 +9,11 @@ import (
 
 func (r *Repository) GetCurrentTotalTime(userID int64) (*models.TotalTime, error) {
 	var totalTime models.TotalTime
-	result := r.db.Where("user_id = ? AND closed = ?", userID, false).First(&totalTime)
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			return nil, nil
-		}
-		return nil, result.Error
+	if err := GetCurrentItem(userID, &totalTime); err  ! = n il {
+		return nil, err
+	}
+	if totalTime.ID == nil {
+		return nil, nil
 	}
 	return &totalTime, nil
 }
